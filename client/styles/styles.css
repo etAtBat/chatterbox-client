@@ -5,6 +5,10 @@ body {
     font-family: arial, sans-serif;
 }
 
+.friend{
+    font-weight:bolder;
+}
+
 #main, #chats {
     width: 500px;
     margin: auto;

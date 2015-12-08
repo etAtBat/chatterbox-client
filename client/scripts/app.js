@@ -89,6 +89,13 @@ app.fetch = function(){
         }
       }
 
+      var allMessages = $(".chat");
+      for(var i = 0; i < allMessages.length; i++){
+        if(friendList.indexOf($(".chat")[i].children[0].children[0].text) !== -1){
+          $($(".chat")[i].children[1]).addClass("friend")
+        }
+      }
+
         // app.updateRooms();
 
     },
@@ -125,8 +132,23 @@ app.addMessage = function(obj){
   $('#chats').append($(string));
 }
 
+
+var friendList = [];
+
 $(document).on('click','.username',function(){
-  app.addFriend();
+  var friend = $(this).html();
+  if (friendList.indexOf(friend) < 0){
+    friendList.push(friend);
+  }
+
+  console.log(friendList);
+  var allMessages = $(".chat");
+  for(var i = 0; i < allMessages.length; i++){
+    if(friendList.indexOf($(".chat")[i].children[0].children[0].text) !== -1){
+      $($(".chat")[i].children[1]).addClass("friend")
+    }
+  }
+
 });
 
 $(document).on('submit','#send .submit',function(){
