@@ -14,7 +14,7 @@ app.send = function(msg, username, roomname){
     text: msg,
     //text:"helloooooo",
     roomname: roomname
-  };
+};
 
        
     $.ajax({
@@ -34,6 +34,39 @@ app.send = function(msg, username, roomname){
   
 };
 
+app.updateRooms = function(){
+
+  $("#roomSelect").empty();
+  $.ajax({
+    // This is the url you should use to communicate with the parse API server.
+    url: 'https://api.parse.com/1/classes/chatterbox',
+    type: 'GET',
+    contentType: 'application/json',
+    success: function (data) {
+
+      data = data.results;
+      var roomObject = {};
+
+      for(var i = 0; i<data.length;i++){//finding all rooms
+        var object = data[i];
+        var room = object.roomname;
+        roomObject[room] = room;
+      }
+
+      for(var key in roomObject){
+        var addToRoomList = "<option value='"+key+"'>"+key+"</option>"
+        $("#roomSelect").append(addToRoomList);
+      }
+
+    },
+    error: function (data) {
+      // See: https://developer.mozilla.org/en-US/docs/Web/API/console.error
+      console.error('chatterbox: Failed to send message');
+    }
+  });
+
+}
+
 app.fetch = function(){
   app.clearMessages();
   $.ajax({
@@ -42,15 +75,21 @@ app.fetch = function(){
     type: 'GET',
     contentType: 'application/json',
     success: function (data) {
-      var array = data.results.slice(0, 10);
-      console.log(array.length);
-      for(var i = 0; i<array.length;i++){
+      var array = data.results.slice(0, 50);
+      var roomObject = {};
+
+      for(var i = 0; i<array.length;i++){//appending messages to chat
         var object = array[i];
         var username = object.username;
         var message = object.text;
-        var room = object.roomname;
-        app.addMessage(object);
+        var room = object.roomname
+        if($("#roomSelect").val() === room){
+          app.addMessage(object);
+        }
       }
+
+        // app.updateRooms();
+
     },
     error: function (data) {
       // See: https://developer.mozilla.org/en-US/docs/Web/API/console.error
@@ -95,14 +134,28 @@ $(document).on('submit','#send .submit',function(){
 
 
 $(document).on('click','button',function(){
-  app.send($("textarea").val(), $("input").val(), $("#roomSelect").val());
+  //if #addRoom.val not in roomList, this is user trying to add new room
+    //append to roomlist
+
+  if($("#addRoom").val() !== ""){
+    app.addRoom($("#addRoom").val());
+    $("#roomSelect").val($("#addRoom").val());
+  }
+
+  var roomName = $("#addRoom").val() || $("#roomSelect").val();
+
+  $("#addRoom").val('');
+
+  console.log(roomName);
+  app.send($("textarea").val(), $("#username").val(), roomName);
   app.fetch();
+
 });
 
 
 app.addRoom = function(lobby){
   var string = "<option value=" + lobby + ">" + lobby + "</option>"; 
-  $("#roomSelect").append(string);
+  $("#roomSelect").prepend(string);
 }
 
 app.addFriend = function(){
@@ -113,8 +166,9 @@ app.handleSubmit = function(){
 
 };
 
-// setInterval(function(){
-//   app.fetch();
-// }, 1000)
+$(document).on('change', '#roomSelect', function (e) {
+  app.fetch();
+});
 
-
+app.updateRooms();
+app.fetch();
