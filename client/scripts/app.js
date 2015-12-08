@@ -22,6 +22,7 @@ app.send = function(msg, username, roomname){
     url: 'https://api.parse.com/1/classes/chatterbox',
     type: 'POST',
     data: JSON.stringify(message),
+    async: false,
     contentType: 'application/json',
     success: function (data) {
       console.log(data);
